@@ -1,0 +1,6 @@
+name: 'Yale Conexis Z-Wave Lock (Battery Poll)'
+packageKey: 'yale-conexis-zwave-lock-battery-poll'
+permissions:
+  zwave: {}
+description: "Stock SmartThings Z-Wave Lock driver with periodic battery polling, for the Yale Conexis L1/L2 Z-Wave module"
+vendorSupportInformation: "https://support.smartthings.com"

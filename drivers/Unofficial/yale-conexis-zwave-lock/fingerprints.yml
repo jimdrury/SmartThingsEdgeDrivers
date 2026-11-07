@@ -1,0 +1,8 @@
+zwaveManufacturer:
+  # Yale Conexis L1/L2 with the Yale Z-Wave module (copied from the stock zwave-lock driver)
+  - id: "Yale/Conexis"
+    deviceLabel: Yale Door Lock
+    manufacturerId: 0x0129
+    productType: 0x6600
+    productId: 0x0002
+    deviceProfileName: base-lock-tamper

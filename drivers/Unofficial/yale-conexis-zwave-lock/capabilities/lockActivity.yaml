@@ -1,0 +1,20 @@
+# Custom capability in the aboutartist00260 namespace; created with the SmartThings CLI.
+# Kept here so the unit tests can load it (test.add_package_capability).
+id: aboutartist00260.lockActivity
+version: 1
+status: proposed
+name: Lock Activity
+ephemeral: false
+attributes:
+  activity:
+    schema:
+      type: object
+      properties:
+        value:
+          type: string
+          maxLength: 100
+      additionalProperties: false
+      required:
+        - value
+    enumCommands: []
+commands: {}

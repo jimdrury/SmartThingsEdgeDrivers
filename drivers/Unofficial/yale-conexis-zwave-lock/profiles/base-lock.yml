@@ -1,0 +1,28 @@
+name: base-lock
+components:
+- id: main
+  capabilities:
+  - id: lock
+    version: 1
+  - id: lockCodes
+    version: 1
+  - id: lockCredentials
+    version: 1
+  - id: lockUsers
+    version: 1
+  - id: battery
+    version: 1
+  - id: refresh
+    version: 1
+  categories:
+  - name: SmartLock
+preferences:
+  - name: "batteryPollHours"
+    title: "Battery check interval (hours)"
+    description: "How often to ask the lock for its battery level"
+    required: true
+    preferenceType: integer
+    definition:
+      minimum: 1
+      maximum: 168
+      default: 6
