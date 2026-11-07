@@ -11,6 +11,10 @@ local cc = require "st.zwave.CommandClass"
 local UserCode = (require "st.zwave.CommandClass.UserCode")({ version = 1 })
 --- @type st.zwave.CommandClass.Notification
 local Notification = (require "st.zwave.CommandClass.Notification")({version=3})
+--- @type st.zwave.CommandClass.Configuration
+local Configuration = (require "st.zwave.CommandClass.Configuration")({ version = 1 })
+--- @type st.zwave.CommandClass.DoorLock
+local DoorLock = (require "st.zwave.CommandClass.DoorLock")({ version = 1 })
 
 local capabilities = require "st.capabilities"
 
@@ -19,6 +23,8 @@ local lock_utils          = require "lock_utils.utils"
 local table_utils         = require "lock_utils.tables"
 local zwave_handlers      = require "lock_handlers.zwave_responses"
 local capability_handlers = require "lock_handlers.capabilities"
+local battery_poll        = require "battery_poll"
+local yale_conexis        = require "yale_conexis"
 
 
 local LockLifecycle = {}
@@ -60,6 +66,18 @@ function LockLifecycle.init(driver, device)
     -- ensure our user/credential state is accurate to the current device state
     device:emit_event(capabilities.tamperAlert.tamper.clear())
   end
+
+  battery_poll.start(device)
+  yale_conexis.init(device)
+end
+
+function LockLifecycle.info_changed(driver, device, event, args)
+  battery_poll.info_changed(driver, device, event, args)
+  yale_conexis.info_changed(driver, device, event, args)
+end
+
+function LockLifecycle.removed(driver, device)
+  battery_poll.stop(device)
 end
 
 function LockLifecycle.driver_switched(driver, device)
@@ -74,6 +92,8 @@ local driver_template = {
     added = LockLifecycle.device_added,
     driver_switched = LockLifecycle.driver_switched,
     init = LockLifecycle.init,
+    infoChanged = LockLifecycle.info_changed,
+    removed = LockLifecycle.removed,
   },
   zwave_handlers = {
     [cc.TIME] = {
@@ -86,12 +106,18 @@ local driver_template = {
     [cc.USER_CODE] = {
       [UserCode.REPORT] = zwave_handlers.user_code_report,
       [UserCode.USERS_NUMBER_REPORT] = zwave_handlers.users_number_report,
+    },
+    [cc.CONFIGURATION] = {
+      [Configuration.REPORT] = yale_conexis.configuration_report
+    },
+    [cc.DOOR_LOCK] = {
+      [DoorLock.OPERATION_REPORT] = yale_conexis.door_lock_operation_report
     }
   },
   capability_handlers = {
     [capabilities.lock.ID] = {
-      [capabilities.lock.commands.lock.NAME] = capability_handlers.lock,
-      [capabilities.lock.commands.unlock.NAME] = capability_handlers.unlock,
+      [capabilities.lock.commands.lock.NAME] = yale_conexis.lock_command,
+      [capabilities.lock.commands.unlock.NAME] = yale_conexis.unlock_command,
     },
     [capabilities.lockUsers.ID] = {
       [capabilities.lockUsers.commands.addUser.NAME] = capability_handlers.add_user,

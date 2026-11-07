@@ -12,13 +12,19 @@ local Battery = (require "st.zwave.CommandClass.Battery")({ version = 1 })
 local consts          = require "lock_utils.constants"
 local lock_utils      = require "lock_utils.utils"
 local tables          = require "lock_utils.tables"
+local yale_conexis    = require "yale_conexis"
 
 local METHOD = {
   KEYPAD = "keypad",
   MANUAL = "manual",
   COMMAND = "command",
-  AUTO = "auto"
+  AUTO = "auto",
+  RFID = "rfid"
 }
+
+-- Yale uses alarm type 144 for a key tag/card unlock, with the tag slot in the alarm level
+local YALE_MFR = 0x0129
+local YALE_TAG_UNLOCK = 144
 
 --- Default handler for alarm command class reports, these were largely OEM-defined
 ---
@@ -47,9 +53,18 @@ local function alarm_report_handler(driver, device, cmd)
       local user_id = credential and credential.userIndex or nil
       event.data = { userIndex = user_id, method = METHOD.KEYPAD}
     end
+  elseif (alarm_type == YALE_TAG_UNLOCK and device.zwave_manufacturer_id == YALE_MFR) then
+    event = capabilities.lock.lock.unlocked()
+    if (credential_index ~= nil) then
+      local tag_name = yale_conexis.tag_name(device, credential_index)
+      event.data = { codeId = tostring(credential_index), codeName = tag_name, userName = tag_name, method = METHOD.RFID }
+    else
+      event.data = { method = METHOD.RFID }
+    end
   elseif (alarm_type == 21) then
     event = capabilities.lock.lock.locked()
-    event.data = {method = (cmd.args.alarm_level == 2) and METHOD.MANUAL or METHOD.KEYPAD}
+    -- the Conexis has no keypad: alarm 21 level 1 is the handle being lifted
+    event.data = {method = (cmd.args.alarm_level == 2 or yale_conexis.is_conexis(device)) and METHOD.MANUAL or METHOD.KEYPAD}
   elseif (alarm_type == 22) then
     event = capabilities.lock.lock.unlocked()
     event.data = {method = METHOD.MANUAL}
@@ -111,7 +126,7 @@ local function alarm_report_handler(driver, device, cmd)
   end
 
   if (event ~= nil) then
-    device:emit_event(event)
+    yale_conexis.emit_lock_event(device, event)
   end
 end
 

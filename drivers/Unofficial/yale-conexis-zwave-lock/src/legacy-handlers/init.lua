@@ -12,6 +12,9 @@ local init_handler = function(driver, device, event)
   local constants = require "st.zwave.constants"
   -- temp fix before this can be changed from being persisted in memory
   device:set_field(constants.CODE_STATE, nil, { persist = true })
+  -- this handler replaces the root init for unmigrated devices, so start battery polling here too
+  require("battery_poll").start(device)
+  require("yale_conexis").init(device)
 end
 
 --- @param driver st.zwave.Driver

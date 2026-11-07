@@ -16,5 +16,70 @@ components:
     version: 1
   - id: refresh
     version: 1
+  - id: aboutartist00260.lockActivity
+    version: 1
   categories:
   - name: SmartLock
+preferences:
+  - name: "batteryPollHours"
+    title: "Battery check interval (hours)"
+    description: "How often to ask the lock for its battery level"
+    required: true
+    preferenceType: integer
+    definition:
+      minimum: 1
+      maximum: 168
+      default: 6
+  - name: "yaleVolume"
+    title: "Beep volume"
+    required: false
+    preferenceType: enumeration
+    definition:
+      options:
+        "1": "Silent"
+        "2": "Low"
+        "3": "High"
+      default: "2"
+  - name: "yaleAutoRelock"
+    title: "Auto relock"
+    required: false
+    preferenceType: enumeration
+    definition:
+      options:
+        "255": "On"
+        "0": "Off"
+      default: "255"
+  - name: "yaleAutoRelockTime"
+    title: "Auto relock delay (seconds)"
+    required: false
+    preferenceType: integer
+    definition:
+      minimum: 0
+      maximum: 60
+      default: 30
+  - name: "yaleWrongTagLimit"
+    title: "Wrong tag attempts before lockout"
+    required: false
+    preferenceType: integer
+    definition:
+      minimum: 1
+      maximum: 20
+      default: 5
+  - name: "yaleWrongTagLockout"
+    title: "Wrong tag lockout time (seconds)"
+    required: false
+    preferenceType: integer
+    definition:
+      minimum: 1
+      maximum: 250
+      default: 180
+  - name: "yaleTagNames"
+    title: "Tag names"
+    description: "Name each key tag slot, e.g. 3=Alex, 1=Sam"
+    required: false
+    preferenceType: string
+    definition:
+      stringType: text
+      minLength: 0
+      maxLength: 250
+      default: ""
